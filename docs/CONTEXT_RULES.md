@@ -88,12 +88,16 @@ Read to leave useful evidence for the next agent and for benchmark scoring.
 
 | Trigger Condition | Action |
 | --- | --- |
-| Task touches database schema, durable records, or migrations | Read `docs/decisions/0004-sqlite-durable-layer.md`, `scripts/schema/`, and relevant CLI code before planning. |
-| Task touches CLI command behavior or installer distribution | Read `docs/decisions/0005-prebuilt-rust-harness-cli.md`, `scripts/README.md`, relevant `crates/harness-cli/*` code, CLI help output, and installer docs. |
-| Task touches auth, authorization, audit/security, data loss, or external providers | Treat as high-risk, read `docs/templates/high-risk-story/*`, and check prior decisions before implementation. |
-| Task changes public API shape, product behavior, or user-visible workflow | Read relevant `docs/product/*`, story packets, and validation expectations before editing. |
+| Task touches Room database schema, entities, or migration logic | Read relevant DAO, Entity, Database files, schema export JSON files, and migration test suite. |
+| Task touches Android manifest, application permissions, or exported components | Read `AndroidManifest.xml` and relevant runtime permission request flows. |
+| Task touches Gradle configuration, build dependencies, plugins, or Gradle wrapper | Read project-level and module-level `build.gradle.kts` and `settings.gradle.kts`. |
+| Task touches background task scheduling or sync tasks | Read relevant WorkManager `Worker` or `CoroutineWorker` implementations, and setup/scheduling triggers. |
+| Task touches network API definition or data transfer models | Read Retrofit/Ktor API services, JSON serializer models, and mapper functions. |
+| Task touches ViewModel logic or UI state flow | Read presentation ViewModels and UI state definitions, checks for `SavedStateHandle` if state recovery is needed. |
+| Task touches auth, keystore, cryptographic operations, or biometrics | Treat as high-risk, read `docs/templates/high-risk-story/*`, and check prior security-related decisions. |
+| Task changes public contract, product behavior, or user-visible workflow | Read relevant `docs/product/*`, story packets, and validation expectations before editing. |
 | Task changes Harness policy, source hierarchy, risk classification, or validation requirements | Read `docs/HARNESS.md`, `docs/FEATURE_INTAKE.md`, `docs/ARCHITECTURE.md`, and `docs/decisions/*`; pause if direction is ambiguous. |
-| Task discovers repeated confusion, stale docs, or missing proof | Read `docs/HARNESS_BACKLOG.md`, record `harness_friction`, and add a backlog item when the fix is out of scope. |
+| Task discovers repeated confusion, stale docs, or missing proof | Read `docs/HARNESS_BACKLOG.md` (or run query backlog), record `harness_friction`, and add a backlog item. |
 | Task makes a maturity, observability, trace quality, or benchmark claim | Read `docs/HARNESS_COMPONENTS.md`, `docs/HARNESS_MATURITY.md`, and `docs/TRACE_SPEC.md`. |
 | Task is normal or high-risk and spans multiple iterations | Create or update a story/progress file under `docs/stories/` and keep it current. |
 | Final response is being prepared | Re-read the validation evidence, `git status --short`, and `docs/TRACE_SPEC.md` before recording the final trace. |

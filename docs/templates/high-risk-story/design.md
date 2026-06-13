@@ -6,19 +6,19 @@ Describe entities, value objects, and business rules.
 
 ## Application Flow
 
-Describe commands, queries, and handlers.
+Describe ViewModels, UI state models, UI events, and Use Case/Interactor logic.
 
 ## Interface Contract
 
-Describe routes, messages, commands, request DTOs, response DTOs, and errors.
+Describe Retrofit/Ktor API endpoints, Room DAO queries, request/response DTOs, and StateFlow/SharedFlow streams.
 
 ## Data Model
 
-Describe tables, indexes, migrations, and retention concerns.
+Describe Room entities, SQLite tables, database indexes, database migrations, and caching/data retention policies.
 
 ## UI / Platform Impact
 
-Describe browser, mobile, desktop, CLI, deployment, or platform-shell impact.
+Describe Jetpack Compose layout impact, Activity/Fragment lifecycles, runtime permissions, background WorkManager jobs, and target API level compatibility.
 
 ## Observability
 

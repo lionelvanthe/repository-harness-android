@@ -1,133 +1,81 @@
 # Architecture
 
-No application stack is selected yet.
+This document defines the Android architecture guidelines and boundary rules that implementation should follow.
 
-No application code exists yet. This document defines generic architecture
-questions and boundary rules that future implementation should adapt after a
-user-provided spec and stack decision exist.
+## Architecture Pattern: Clean Architecture + MVVM/MVI
 
-## Discovery Before Shape
-
-Before proposing implementation shape, identify:
-
-- Product surfaces: browser, mobile, desktop, CLI, API, worker, or service.
-- Runtime stack: language, framework, database, queues, providers, and hosting.
-- Core domains: the product concepts that deserve stable names and contracts.
-- Boundary inputs: user input, API requests, webhooks, jobs, files, credentials,
-  provider payloads, and environment configuration.
-- Validation ladder: the smallest checks that can prove the selected stack.
-
-Record stack choices in `docs/decisions/` when they meaningfully constrain
-future work.
-
-## Default Layering
+To ensure testability, maintainability, and clear separation of concerns, the project follows Clean Architecture layered in four logical layers:
 
 ```text
-domain
-  <- application
-      <- infrastructure
-          <- interface
-              <- app surfaces
+Domain Layer (Pure Kotlin/Java)
+  <- Data / Repository Layer (Room, Retrofit, Android libraries)
+      <- Presentation Layer (Jetpack Compose, ViewModels)
+          <- UI / Surface Components (Activities, Fragments, Platform Services)
 ```
 
-## Candidate Structure
+### 1. Domain Layer (Core Business Logic)
+* **What it contains:** Entities, Value Objects, Use Cases/Interactors, Repository interfaces.
+* **Constraints:** Must be a **pure Kotlin library** module. It must have **zero dependencies** on the Android framework, SQLite drivers, UI packages, or third-party serialization libraries (e.g., GSON, kotlinx.serialization).
 
-```text
-app/
-  domain/
-    entities/
-    value-objects/
-    repositories/
-    services/
+### 2. Data / Repository Layer (Infrastructure & Storage)
+* **What it contains:** Repository implementations, Room DAOs and Databases, API service clients (Retrofit/Ktor), local preferences (Preferences DataStore, EncryptedSharedPreferences).
+* **Constraints:** Implements interfaces defined in the Domain layer. Responsible for caching strategies, network-to-local synchronization, and mapping data transfer objects (DTOs) to Domain entities.
 
-  application/
-    commands/
-    queries/
-    handlers/
+### 3. Presentation Layer (UI State Management)
+* **What it contains:** ViewModels, UI State definitions, UI Events (MVI), StateFlow/SharedFlow publishers.
+* **Constraints:** ViewModels survive configuration changes. They must never reference Android `Context` or View classes directly to prevent memory leaks and ensure JVM testability.
 
-  infrastructure/
-    database/
-    logging/
-    notifications/
+### 4. UI / Surface Components Layer (Visual representation)
+* **What it contains:** Jetpack Compose screens/composables, Activities, Fragments, Custom Views.
+* **Constraints:** Dumb UI layer. It only listens to UI State emitted by ViewModels and passes user actions back.
 
-  interface/
-    controllers/
-    dto/
-    presenters/
-    routes/
-    middlewares/
-
-surfaces/
-  browser/
-  mobile/
-  desktop/
-  cli/
-```
-
-This is a thinking template, not a scaffold. Create real folders only when a
-story enters implementation and the selected stack needs them.
+---
 
 ## Dependency Rule
 
-Inner layers must not depend on outer layers.
+Outer layers must depend only on inner layers. Dependencies must flow inwards.
 
 | Layer | May depend on | Must not depend on |
 | --- | --- | --- |
-| domain | nothing project-external except tiny pure utilities | framework, database, UI, provider, process/env |
-| application | domain | framework, UI, provider, database concrete clients |
-| infrastructure | domain, application | interface controllers or UI |
-| interface | all backend layers | UI state or platform shell assumptions |
-| app surfaces | API contracts and app-facing clients | domain internals directly |
+| **Domain** | Nothing project-external except core language utilities | Android SDK, Room, Retrofit, Jetpack Compose, ViewModels, DI concrete components |
+| **Data / Repository** | Domain, standard libraries (Room, Retrofit, DataStore) | Jetpack Compose, ViewModels, Activities, Fragments |
+| **Presentation** | Domain (Use Cases), Repository interfaces | Compose UI components directly, Activities, Fragments |
+| **UI / Component** | Presentation (ViewModels), Jetpack Compose | Domain internals directly (should communicate via ViewModel/Use Cases) |
+
+---
 
 ## Parse-First Boundary Rule
 
-Unknown data must be parsed at boundaries before it enters inner code.
+Raw or untrusted data must be parsed, validated, and normalized at the system boundaries before entering the domain layer.
 
-Boundaries include:
-
-- HTTP request bodies, params, and query strings.
-- Session payloads and identity claims.
-- Environment variables.
-- Database rows returned from external clients.
-- Platform shell payloads.
-- Deep links, tokens, and signed URLs.
-- Provider webhooks, events, and async payloads.
+Android boundaries include:
+* **Network Responses:** Raw JSON payloads from REST APIs or WebSockets.
+* **Local Input:** User input from text fields, forms, or file pickers.
+* **System Intents & Deep Links:** Bundle extras, URI query parameters, and custom scheme payloads.
+* **Sensors/OS Events:** Location updates, Bluetooth payloads, broadcast receiver extras.
 
 Target flow:
-
 ```text
-unknown input
-  -> parser
-  -> typed DTO or command
-  -> application use case
-  -> domain object/value object
+Raw/Untrusted Input
+  -> Parser / Validator (e.g., kotlinx.serialization, custom validation)
+  -> Typed Data Transfer Object (DTO) / Intent Extra Wrapper
+  -> Repository mapper
+  -> Domain-safe Type (e.g., UserId, EmailAddress, Amount)
 ```
 
-Inner layers should work with meaningful product types such as `UserId`,
-`AccountId`, `WorkspaceId`, `Role`, `DateRange`, or domain-specific IDs,
-rather than repeatedly validating raw strings.
+Domain models should use custom Kotlin Value Classes (e.g., `@JvmInline value class Email(val value: String)`) to enforce domain rules compile-time rather than carrying raw `String` or `Int` types through the application.
 
-## Command/Query Boundary
+---
 
-If the product has both reads and writes, keep command/query separation clear at
-the code level even when the storage layer is simple:
+## Asynchronous Execution & Concurrency
 
-- Commands mutate state and own audit side effects.
-- Queries read state and format for consumers.
-- Shared domain rules live in domain/application, not controllers.
+* **Coroutines & Flow:** Use Kotlin Coroutines for async tasks and `Flow` / `StateFlow` for streaming updates.
+* **Dispatchers:** Always inject Coroutine dispatchers (`Dispatchers.IO`, `Dispatchers.Default`, `Dispatchers.Main`) to allow easy testing with `TestDispatcher`. Never hardcode dispatchers inside business logic.
+* **Lifecycle Awareness:** Collect UI states safely using lifecycle-aware collectors like `collectAsStateWithLifecycle()` in Compose.
 
-## Observability Contract
+---
 
-The future server should emit one canonical JSON log line per request with:
+## Dependency Injection (DI)
 
-- timestamp
-- level
-- request_id
-- user_id when known
-- action
-- duration_ms
-- status_code
-- message
-
-Audit logs are product records. Application logs are operational records. Do not
-use one as a substitute for the other.
+* Use **Hilt** (or Koin) as the Dependency Injection framework.
+* Define scopes correctly: `@Singleton` for global data/network sources, `@ActivityRetainedScoped` or `@ViewModelScoped` for presentation scopes.

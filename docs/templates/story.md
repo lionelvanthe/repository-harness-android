@@ -36,13 +36,13 @@ Describe the behavior this story must make true.
 When updating durable proof status, use numeric booleans:
 `scripts/bin/harness-cli story update --id <id> --unit 1 --integration 1 --e2e 0 --platform 0`.
 
-| Layer | Expected proof |
+| Layer | Expected proof / Command |
 | --- | --- |
-| Unit | |
-| Integration | |
-| E2E | |
-| Platform | |
-| Release | |
+| Unit | JVM Unit Tests (e.g. `./gradlew testDebugUnitTest`) |
+| Integration | Room DAO / Robolectric tests |
+| E2E | Compose / Espresso UI Tests (e.g. `./gradlew connectedAndroidTest`) |
+| Platform | Android Lint & ktlint formatting (e.g. `./gradlew lintDebug`) |
+| Release | Release APK/Bundle optimization & R8 checks |
 
 ## Harness Delta
 

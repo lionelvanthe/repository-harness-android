@@ -1,12 +1,12 @@
-# repository-harness
+# repository-harness-android
 
-Turn any software repo into an agent-ready workspace.
+Turn any Android repository into an agent-ready workspace.
 
-`repository-harness` is a repository-level operating harness for Claude Code,
-Codex, Cursor, and other coding agents. It gives agents the missing project
-context they need before they change code: where to start, what the product
-contract says, how risky the work is, what proof is required, and which
-decisions future agents should inherit.
+`repository-harness-android` is a repository-level operating harness for Claude Code,
+Codex, Cursor, and other coding agents working on Android codebases. It gives agents
+the missing Android-specific project context they need before they change code:
+where to start, what the product contract says, how risky the work is, what proof
+is required, and which decisions future agents should inherit.
 
 The app is what users touch. The harness is what agents touch.
 
@@ -165,35 +165,35 @@ human intent or product spec
   -> product contract
   -> feature intake
   -> story packet
-  -> validation expectations
-  -> implementation work
+  -> Android validation expectations (Gradle, Lint, JVM/Instrumented tests)
+  -> implementation work (Kotlin/Compose/XML)
   -> decision or lesson captured for future agents
 ```
 
 Implementation prompts do not go straight to code. They first pass through
-feature intake, become story-sized work when needed, and then carry both product
-validation and harness maintenance expectations.
+feature intake, become story-sized work when needed, and then carry both Android product
+validation (using Gradle build commands) and harness maintenance expectations.
 
 ## Current State
 
-This repository is in Harness v0.
+This repository is in Harness v0, tailored specifically for Android development.
 
 There is no application implementation and no baked-in product specification
-yet. The current work is the reusable project harness: the file structure,
+yet. The current work is the reusable Android project harness: the file structure,
 agent operating model, feature intake process, story templates, and validation
-expectations that help humans and agents turn a future user-provided spec into
-implementation work.
+expectations (Android Lint, Unit/Integration tests, Espresso UI tests) that help
+humans and agents turn a future user-provided Android spec into implementation work.
 
 ## Product Sources
 
 No product contract is currently defined.
 
-When a user provides a project specification, add or reference it as the input
+When a user provides an Android project specification, add or reference it as the input
 spec for the first buildout, then derive smaller living artifacts from it:
 
 - `docs/product/`: current product contract files, created from the spec.
 - `docs/stories/`: story packets and backlog created from selected work.
-- `docs/TEST_MATRIX.md`: behavior-to-proof control panel.
+- `docs/TEST_MATRIX.md`: behavior-to-proof control panel mapping Android test layers.
 - `docs/decisions/`: durable decisions and tradeoffs.
 
 Do not keep a project-specific spec or product breakdown in this harness until
@@ -242,6 +242,6 @@ with coding agents.
 
 Short description:
 
-> An agent-ready repo harness for Claude Code, Codex, Cursor, and other coding
-> agents: AGENTS.md, product contracts, story packets, validation matrix, and
-> decision records.
+> An agent-ready Android repo harness for Claude Code, Codex, Cursor, and other coding
+> agents: AGENTS.md, Android product contracts, story packets, Android validation matrix,
+> and decision records.

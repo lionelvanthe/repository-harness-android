@@ -16,12 +16,12 @@ command
 
 | Check | Result | Notes |
 | --- | --- | --- |
-| Typecheck | not run | Command does not exist yet |
-| Unit | not run | Command does not exist yet |
-| Integration | not run | Command does not exist yet |
-| E2E | not run | Command does not exist yet |
-| Platform | not run | Command does not exist yet |
-| Release | not run | Command does not exist yet |
+| Lint / Static Check | not run | Gradle lint check (e.g. `./gradlew lintDebug`) |
+| Unit (JUnit) | not run | JVM Unit tests (e.g. `./gradlew testDebugUnitTest`) |
+| Integration | not run | Room DAO/Migrations or Robolectric tests |
+| E2E (Instrumented) | not run | Espresso or Compose UI tests (e.g. `./gradlew connectedAndroidTest`) |
+| Platform (ktlint/detekt) | not run | Code formatter and static analysis check |
+| Release Build | not run | Release APK / App Bundle generation check |
 
 ## Evidence
 

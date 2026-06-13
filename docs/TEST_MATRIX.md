@@ -23,11 +23,8 @@ implemented until tests or validation evidence exist.
 
 ## Evidence Rules
 
-- Unit proof covers pure domain and application rules.
-- Integration proof covers backend enforcement, data integrity, provider
-  behavior, jobs, or service contracts.
-- E2E proof covers user-visible browser flows.
-- Platform proof covers only shell, deployment, mobile, desktop, or runtime
-  behavior that cannot be proven in lower layers.
-- A story can be implemented without every proof column if the story packet
-  explains why.
+- **Unit proof** covers pure Kotlin/Java domain logic, Use Cases, ViewModels, and data mappers (run via JVM-based JUnit tests: `./gradlew testDebugUnitTest`).
+- **Integration proof** covers local SQLite storage caching, Room database migration verification, API networking mock calls (MockWebServer), or Robolectric tests running with Android framework mock interfaces on the JVM.
+- **E2E proof** covers user-visible screen flows, animations, and input handling on Compose or XML views (run via Espresso or Compose UI instrumented tests on an emulator/device: `./gradlew connectedAndroidTest`).
+- **Platform proof** covers Android Lint static analysis (./gradlew lintDebug), ktlint/detekt formatting, Proguard/R8 shrinking verification, APK size validation, and multi-API version compatibility smoke checks.
+- A story can be implemented without every proof column if the story packet explains why.

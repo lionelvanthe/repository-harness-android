@@ -248,8 +248,8 @@ For every task:
 Stories may carry a mechanical proof command:
 
 ```bash
-scripts/bin/harness-cli story add --id US-012 --title "Story verification" --lane normal --verify "cargo test --workspace"
-scripts/bin/harness-cli story update --id US-012 --verify "cargo test --workspace"
+scripts/bin/harness-cli story add --id US-012 --title "Story verification" --lane normal --verify "./gradlew testDebugUnitTest"
+scripts/bin/harness-cli story update --id US-012 --verify "./gradlew testDebugUnitTest"
 scripts/bin/harness-cli story verify US-012
 ```
 
@@ -375,19 +375,19 @@ is:
 
 ```text
 validate:quick
-  format, lint, typecheck, unit tests, architecture check
+  Kotlin format check (ktlint/detekt), Android Lint (./gradlew lintDebug), JVM Unit tests (./gradlew testDebugUnitTest)
 
 test:integration
-  backend, database, provider, or service checks as the stack requires
+  Robolectric tests for JVM-based Android framework mocking, Room database migration verification
 
 test:e2e
-  user-visible end-to-end flows
+  Espresso, UI Automator, or Compose UI tests running on device/emulator (./gradlew connectedAndroidTest)
 
 test:platform
-  shell, mobile, desktop, or deployment smoke checks as the stack requires
+  Multi-API compatibility verification, build variant checks, manifest merge validation
 
 test:release
-  full suite, log checks, and performance smoke
+  Production builds (./gradlew assembleRelease / bundleRelease), ProGuard/R8 shrinking checks
 ```
 
 Agents must not claim these commands pass until they exist and have been run.
